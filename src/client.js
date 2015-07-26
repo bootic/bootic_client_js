@@ -1,5 +1,6 @@
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
+var uriTemplate = require('uritemplate');
 
 var Entity = require('./entity');
 
@@ -28,12 +29,18 @@ module.exports = (function (Entity) {
     },
 
     run: function (link, params) {
-      var self = this
-      var href = link.href
-      var method = link['method'] || 'get'
+      var self = this;
+      var href = link.href;
+      var templated = !!link['templated'];
+      var method = link['method'] || 'get';
       var headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
+      };
+
+      if(templated) {
+        var template = uriTemplate.parse(href);
+        href = template.expand(params);
       }
 
       return fetch(href, {
