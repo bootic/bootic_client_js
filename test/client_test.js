@@ -61,33 +61,55 @@ describe('Client', function () {
 
   describe('#run()', function () {
 
-    describe('no parameters', helpers.testResponse({
-      href: 'https://api.apis.com',
-      method: 'post'
-    }, helpers.headers('xxx'), '{"name":"Foobar"}', 201, function () {
+    describe('no parameters',
+      helpers.reqResp('post', 'https://api.apis.com')
+        .withRequestToken('xxx')
+        .withResponseStatus(201)
+        .withResponseBody({name: 'Foobar'})
+        .run(function () {
+          it('makes request and returns a promise that yields an Entity', function (done) {
 
-      it('makes request and returns a promise that yields an Entity', function (done) {
-        helpers.expectPromise(subject.run({href: 'https://api.apis.com', method: 'post'}), function (args) {
-          assert.equal(args[0].prop('name'), 'Foobar')
-        }, done)
-      })
+            helpers.expectPromise(subject.run({href: 'https://api.apis.com', method: 'post'}), function (args) {
+              assert.equal(args[0].prop('name'), 'Foobar')
+            }, done)
+          })
+        })
+    )
 
-    }))
+    describe('templated URL',
+      helpers.reqResp('get', 'https://api.apis.com/users/111?q=foo')
+        .withRequestToken('xxx')
+        .withResponseBody({name: 'Foobar'})
+        .withResponseStatus(201)
+        .run(function () {
+          it('expands templated URIs and makes request with aditional params', function (done) {
+            var link = {href: 'https://api.apis.com/users/{id}{?q}', method: 'get', templated: true}
 
-    describe('templated URL', helpers.testResponse({
-      href: 'https://api.apis.com/users/111?q=foo',
-      method: 'get'
-    }, helpers.headers('xxx'), '{"name":"Foobar"}', 201, function () {
+            helpers.expectPromise(subject.run(link, {id: 111, q: 'foo', foo: {name: 'lala'}}), function (args) {
+              assert.equal(args[0].prop('name'), 'Foobar')
+            }, done)
+          })
+        })
+    );
 
-      it('expands templated URIs and makes request', function (done) {
-        var link = {href: 'https://api.apis.com/users/{id}{?q}', method: 'get', templated: true}
+    describe('templated URL with POST body',
+      helpers.reqResp('post', 'https://api.apis.com/users/111')
+        .withRequestToken('xxx')
+        .withRequestBody({foo: {name: 'lala'}})
+        .withResponseStatus(200)
+        .withResponseBody({name: 'lala', id: 111})
+        .run(function () {
+          it('expands templated URIs and makes request with aditional params', function (done) {
+            var link = {href: 'https://api.apis.com/users/{id}', method: 'post', templated: true}
 
-        helpers.expectPromise(subject.run(link, {id: 111, q: 'foo'}), function (args) {
-          assert.equal(args[0].prop('name'), 'Foobar')
-        }, done)
-      })
+            helpers.expectPromise(subject.run(link, {id: 111, foo: {name: 'lala'}}), function (args) {
+              assert.equal(args[0].prop('name'), 'lala')
+              assert.equal(args[0].prop('id'), 111)
+            }, done)
+          })
+        })
+    );
 
-    }))
   })
 
 })

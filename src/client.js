@@ -1,7 +1,8 @@
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
-var uriTemplate = require('uritemplate');
-
+// var uriTemplate = require('uritemplate');
+var uriTemplate = require('uri-templates');
+var util = require('./util');
 var Entity = require('./entity');
 
 module.exports = (function (Entity) {
@@ -31,6 +32,8 @@ module.exports = (function (Entity) {
     run: function (link, params) {
       var self = this;
       var href = link.href;
+      var template;
+      var params = params ? util.clone(params) : {};
       var templated = !!link['templated'];
       var method = link['method'] || 'get';
       var headers = {
@@ -39,14 +42,25 @@ module.exports = (function (Entity) {
       };
 
       if(templated) {
-        var template = uriTemplate.parse(href);
-        href = template.expand(params);
+        template = uriTemplate(href);
+        href = template.fill(params);
       }
 
-      return fetch(href, {
+      var options = {
         method: method,
         headers: this._authHandler(headers, this._opts)
-      }).then(function (response) {
+      };
+
+      if(method == 'post' || method == 'put' || method == 'patch') {
+        if(template) {
+          template.varNames.forEach(function (v) {
+            delete params[v]
+          })
+        }
+        options.body = JSON.stringify(params)
+      }
+
+      return fetch(href, options).then(function (response) {
         return response.json()
       }).then(function (data) {
         return new Entity(data, self)

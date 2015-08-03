@@ -16,6 +16,7 @@ function Response (body, info) {
 
 module.exports = {
   testResponse: testResponse,
+  reqResp: reqResp,
   headers: headers,
   expectPromise: expectPromise
 }
@@ -35,7 +36,103 @@ function headers (token) {
   }
 }
 
-function testResponse (link, reqHeaders, respBody, respStatus, fn) {
+function ReqResp (method, href) {
+  this.href = href;
+
+  this.req = {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json' 
+    },
+    body: '{}'
+  }
+
+  this.resp = {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: null
+  }
+}
+
+ReqResp.prototype = {
+  withRequestHeaders: function (headers) {
+    this.req.headers = headers
+    return this
+  },
+  withRequestBody: function (obj) {
+    this.req.body = JSON.stringify(obj);
+    return this
+  },
+  withResponseStatus: function (st) {
+    this.resp.status = st
+    return this
+  },
+  withRequestToken: function (token) {
+    this.req.headers = headers(token);
+    return this
+  },
+  withResponseHeaders: function (obj) {
+    this.resp.headers = obj;
+    return this
+  },
+  withResponseBody: function (obj) {
+    this.resp.body = obj;
+    return this
+  },
+  run: function (fn) {
+    var self = this;
+
+    return function () {
+      var fetchStub;
+
+      beforeEach(function () {
+        fetchStub = sinon.stub(global, 'fetch')
+        var method = self.req.method;
+
+        var resp = new Response(JSON.stringify(self.resp.body), {
+          status: self.resp.status,
+          headers: self.resp.headers
+        })
+        var promise = Promise.resolve(resp)
+        var reqOpts = {
+          method: self.req.method,
+          headers: self.req.headers
+        };
+
+        if(method == 'post' ||  method == 'put' || method == 'patch') {
+          reqOpts.body = self.req.body
+        }
+
+        fetchStub.returns(Promise.reject(new Error('Fetch expectation mis-match')));
+
+        fetchStub
+          .withArgs(self.href, reqOpts)
+          .returns(promise)
+      })
+
+      afterEach(function () {
+        global.fetch.restore()
+      })
+
+      fn.call(this)
+    }
+  }
+}
+
+function reqResp (method, href) {
+  return new ReqResp(method, href)
+}
+
+function testResponse (
+  link,
+  reqHeaders,
+  respBody,
+  respStatus,
+  fn,
+  reqBody
+) {
   return function () {
     var fetchStub;
 
