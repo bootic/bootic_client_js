@@ -42,7 +42,7 @@ function ReqResp (method, href) {
   this.req = {
     method: method,
     headers: {
-      'Content-Type': 'application/json' 
+      'Content-Type': 'application/json'
     },
     body: '{}'
   }
