@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-  entry: './src/main.js',
+  entry: './index.js',
   output: {
     path: __dirname + '/dist',
     filename: 'bootic_client.js'
