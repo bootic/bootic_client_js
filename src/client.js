@@ -3,9 +3,8 @@ require('isomorphic-fetch');
 // var uriTemplate = require('uritemplate');
 var uriTemplate = require('uri-templates');
 var util = require('./util');
-var Entity = require('./entity');
 
-module.exports = (function (Entity) {
+module.exports = (function () {
 
   var ROOT_URL = 'https://api.bootic.net/v1';
 
@@ -62,12 +61,10 @@ module.exports = (function (Entity) {
 
       return fetch(href, options).then(function (response) {
         return response.json()
-      }).then(function (data) {
-        return new Entity(data, self)
       })
     }
   }
 
   return Client
-})(Entity);
+})();
 

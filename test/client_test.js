@@ -18,7 +18,7 @@ describe('Client', function () {
 
       it('makes request to default root and returns a promise that yields an Entity', function (done) {
         helpers.expectPromise(subject.root(), function (args) {
-          assert.equal(args[0].prop('name'), 'root')
+          assert.equal(args[0].name, 'root')
         }, done)
       })
 
@@ -38,7 +38,7 @@ describe('Client', function () {
 
       it('makes request to custom root and returns a promise that yields an Entity', function (done) {
         helpers.expectPromise(subject.root(), function (args) {
-          assert.equal(args[0].prop('name'), 'root2')
+          assert.equal(args[0].name, 'root2')
         }, done)
       })
 
@@ -51,7 +51,7 @@ describe('Client', function () {
 
       it('makes request to default root and returns a promise that yields an Entity', function (done) {
         helpers.expectPromise(subject.root(), function (args) {
-          assert.equal(args[0].prop('name'), 'error')
+          assert.equal(args[0].name, 'error')
         }, done)
       })
 
@@ -70,7 +70,7 @@ describe('Client', function () {
           it('makes request and returns a promise that yields an Entity', function (done) {
 
             helpers.expectPromise(subject.run({href: 'https://api.apis.com', method: 'post'}), function (args) {
-              assert.equal(args[0].prop('name'), 'Foobar')
+              assert.equal(args[0].name, 'Foobar')
             }, done)
           })
         })
@@ -86,7 +86,7 @@ describe('Client', function () {
             var link = {href: 'https://api.apis.com/users/{id}{?q}', method: 'get', templated: true}
 
             helpers.expectPromise(subject.run(link, {id: 111, q: 'foo', foo: {name: 'lala'}}), function (args) {
-              assert.equal(args[0].prop('name'), 'Foobar')
+              assert.equal(args[0].name, 'Foobar')
             }, done)
           })
         })
@@ -103,13 +103,27 @@ describe('Client', function () {
             var link = {href: 'https://api.apis.com/users/{id}', method: 'post', templated: true}
 
             helpers.expectPromise(subject.run(link, {id: 111, foo: {name: 'lala'}}), function (args) {
-              assert.equal(args[0].prop('name'), 'lala')
-              assert.equal(args[0].prop('id'), 111)
+              assert.equal(args[0].name, 'lala')
+              assert.equal(args[0].id, 111)
             }, done)
           })
         })
     );
 
+    describe('401 Unauthorized',
+      helpers.reqResp('post', 'https://api.apis.com')
+        .withRequestToken('xxx')
+        .withResponseStatus(401)
+        .withResponseBody({error: 'Unauthorized'})
+        .run(function () {
+          it('fffff', function (done) {
+
+            helpers.expectPromise(subject.run({href: 'https://api.apis.com', method: 'post'}), function (args) {
+              assert.equal(args[0].error, 'Unauthorized')
+            }, done)
+          })
+        })
+    )
   })
 
 })
