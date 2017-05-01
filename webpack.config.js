@@ -1,4 +1,5 @@
-var path = require('path');
+var path = require('path'),
+    webpack = require('webpack');
 
 module.exports = {
   entry: './index.js',
@@ -10,5 +11,15 @@ module.exports = {
     loaders: [
       {test: /\.js6$/, exclude: /node_modules/, loader: "babel-loader"}
     ]
-  }
+  },
+  plugins: [
+      new webpack.optimize.UglifyJsPlugin({
+        compress: {
+            warnings: false,
+        },
+        output: {
+            comments: false,
+        },
+      }),
+  ]
 }

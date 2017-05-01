@@ -1,6 +1,3 @@
-require('es6-promise').polyfill();
-require('isomorphic-fetch');
-
 var uriTemplate = require('uri-templates');
 var util = require('./util');
 
@@ -9,7 +6,9 @@ module.exports = (function () {
   var ROOT_URL = 'https://api.bootic.net/v1';
 
   var AccessTokenHandler = function (headers, opts) {
-    headers['Authorization'] = 'Bearer ' + opts.accessToken
+    if(opts.accessToken) {
+      headers['Authorization'] = 'Bearer ' + opts.accessToken
+    }
     return headers
   }
 

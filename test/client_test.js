@@ -1,3 +1,4 @@
+require('isomorphic-fetch');
 var assert = require('assert'),
     helpers = require('./test_helpers'),
     Client = require('../src/client');
