@@ -1,0 +1,67 @@
+## Javascript client for the Bootic API
+
+API docs: https://developers.bootic.net/
+
+### Usage in the browser
+
+```html
+<script src="dist/bootic_client.js"></script>
+<script>
+  var client = new bootic.Client({
+    accessToken: "abc"
+  })
+
+  // the root
+  client.root().then(function(data){
+    console.log('the root', data)
+  })
+</script>
+```
+
+### Following links
+
+`Client#run(link, params)` takes a link object and optional parameters
+
+```javascript
+var link = {
+  href: "https://api.bootic.net/v1/products",
+  method: "get"
+}
+
+client.run(link, {q: "sale"})
+  .then(function(data){
+    console.log('product data', data)
+  })
+```
+
+So you can follow links contained in API responses by chaining promises:
+
+```javascript
+var myShop = client.root().then(function(root) { return root.shops[0] })
+var myProducts = myShop.then(function(shop) { return client.run(shop._links["btc:products"]) })
+
+myProducts.then(function(prods) {
+  console.log('products', prods)
+})
+```
+
+### Refreshing access token
+
+Bootic access tokens are shortlived. You can configure the cient to run a function and re-authorize the client when the API returns a status `401`.
+
+When encountering an unauthorized response, the client will run this function and try again, transparently.
+
+```javascript
+// tell the client what to do when the access token expires
+client.onUnauthorized(function(client, next) {
+  // get a new token from your server
+  fetch("/token").then(function(r) {
+    var data = r.json()
+    // authorize the client
+    client.authorize(data.token)
+    // don't forget to call next()
+    next()
+  })
+})
+```
+
