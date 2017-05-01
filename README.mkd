@@ -49,8 +49,6 @@ myProducts.then(function(prods) {
 
 Bootic access tokens are shortlived. You can configure the cient to run a function and re-authorize the client when the API returns a status `401`.
 
-When encountering an unauthorized response, the client will run this function and try again, transparently.
-
 ```javascript
 // tell the client what to do when the access token expires
 client.onUnauthorized(function(client, next) {
@@ -62,6 +60,17 @@ client.onUnauthorized(function(client, next) {
     // don't forget to call next()
     next()
   })
+})
+```
+
+When encountering an unauthorized response, the client will run this function and try again, transparently.
+
+```javascript
+var client = new bootic.Client({accessToken: "nope"}).onUnauthorized(function(client, next){ ... })
+
+// this will fail with a 401 the first time, fetch a new token and try again
+client.root().then(function(root) {
+  console.log('success!', root)
 })
 ```
 
