@@ -112,10 +112,17 @@ describe('Client', function () {
         .withResponseStatus(401)
         .withResponseBody({error: 'Unauthorized'})
         .run(function () {
-          it('fffff', function (done) {
+          it('it calls onUnauthorized callback', function (done) {
+            var test = null
 
-            helpers.expectPromise(subject.run({href: 'https://api.apis.com', method: 'post'}), function (args) {
-              assert.equal(args[0].error, 'Unauthorized')
+            var client = new Client({accessToken: 'xxx'}).onUnauthorized(function (client, next) {
+              test = "callback run"
+              next("newtoken")
+            })
+
+            helpers.expectPromise(client.run({href: 'https://api.apis.com', method: 'post'}), function (args) {
+              assert.equal(test, "callback run")
+              // assert.equal(args[0].error, 'Unauthorized')
             }, done)
           })
         })

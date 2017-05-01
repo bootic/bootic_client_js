@@ -1,6 +1,6 @@
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
-// var uriTemplate = require('uritemplate');
+
 var uriTemplate = require('uri-templates');
 var util = require('./util');
 
@@ -13,14 +13,33 @@ module.exports = (function () {
     return headers
   }
 
+  var noop = function (client, next, reject) { reject("Unauthorized") }
+
   var Client = function(opts) {
     opts = opts || {}
     this._opts = opts
+    this.logger = opts['logger'] || console;
     this._authHandler = AccessTokenHandler
     this._rootUrl = opts['rootUrl'] || ROOT_URL;
+    this._retryCount = 0;
+    this.onUnauthorized(noop)
   };
 
   Client.prototype = {
+    authorize: function(token) {
+      this._opts.accessToken = token
+      return this
+    },
+
+    onUnauthorized: function (fn) {
+      var self = this;
+      this._onUnauthorized = function () {
+        return new Promise(function(resolve, reject) {
+          fn(self, resolve, reject)
+        })
+      }
+      return this
+    },
 
     root: function () {
       return this.run({
@@ -59,8 +78,26 @@ module.exports = (function () {
         options.body = JSON.stringify(params)
       }
 
+      var onUnauthorized = this._onUnauthorized,
+          self = this;
+
+      self.logger.log("request", options.method, href)
+
       return fetch(href, options).then(function (response) {
-        return response.json()
+        if(response.status == 401) {
+          if(self._retryCount == 0) {
+            self._retryCount++
+            self.logger.log("401. Retrying...")
+            return onUnauthorized(self).then(function() {
+              return self.run(link, params)
+            })
+          } else {
+            return response.json()
+          }
+        } else {
+          self._retryCount = 0
+          return response.json()
+        }
       })
     }
   }
