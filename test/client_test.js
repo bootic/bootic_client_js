@@ -10,7 +10,6 @@ describe('Client', function () {
   })
 
   describe('#root()', function () {
-
     describe('with default href', helpers.testResponse({
       href: 'https://api.bootic.net/v1',
       method: 'get'
@@ -41,7 +40,6 @@ describe('Client', function () {
           assert.equal(args[0].name, 'root2')
         }, done)
       })
-
     }))
 
     describe('with response error', helpers.testResponse({
@@ -54,13 +52,11 @@ describe('Client', function () {
           assert.equal(args[0].name, 'error')
         }, done)
       })
-
     }))
   })
 
 
   describe('#run()', function () {
-
     describe('no parameters',
       helpers.reqResp('post', 'https://api.apis.com')
         .withRequestToken('xxx')
@@ -125,5 +121,4 @@ describe('Client', function () {
         })
     )
   })
-
 })
