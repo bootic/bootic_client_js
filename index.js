@@ -1,3 +1,1 @@
-bootic = {
-  Client: require('./src/client')
-}
+exports.Client = require('./src/client');
