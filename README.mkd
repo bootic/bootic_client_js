@@ -54,7 +54,8 @@ Bootic access tokens are shortlived. You can configure the cient to run a functi
 client.onUnauthorized(function(client, next) {
   // get a new token from your server
   fetch("/token").then(function(r) {
-    var data = r.json()
+    return r.json()
+  }).then(function (data) {
     // authorize the client
     client.authorize(data.token)
     // don't forget to call next()
