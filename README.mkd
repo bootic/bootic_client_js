@@ -75,3 +75,13 @@ client.root().then(function(root) {
 })
 ```
 
+### Handling Forbidden responses
+
+You can optionally attach an `onForbidden` handler.
+
+```javascript
+var client = client.onForbidden(function (cl, next) {
+  window.location = "/login"
+  next()
+})
+```

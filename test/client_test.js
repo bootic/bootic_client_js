@@ -43,14 +43,21 @@ describe('Client', function () {
       })
     }))
 
-    describe('with response error', helpers.testResponse({
+    describe('with Forbidden error', helpers.testResponse({
       href: 'https://api.bootic.net/v1',
       method: 'get'
     }, helpers.headers('xxx'), '{"name":"error"}', 403, function () {
 
       it('makes request to default root and returns a promise that yields an Entity', function (done) {
+        var callBackRun = false
+        subject.onForbidden(function (client, next) {
+          callBackRun = true
+          next()
+        });
+
         helpers.expectPromise(subject.root(), function (args) {
           assert.equal(args[0].name, 'error')
+          assert.equal(callBackRun, true)
         }, done)
       })
     }))

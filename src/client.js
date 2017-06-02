@@ -22,6 +22,7 @@ module.exports = (function () {
     this._rootUrl = opts['rootUrl'] || ROOT_URL;
     this._retryCount = 0;
     this.onUnauthorized(noop)
+    this.onForbidden(noop)
   };
 
   Client.prototype = {
@@ -33,6 +34,16 @@ module.exports = (function () {
     onUnauthorized: function (fn) {
       var self = this;
       this._onUnauthorized = function () {
+        return new Promise(function(resolve, reject) {
+          fn(self, resolve, reject)
+        })
+      }
+      return this
+    },
+
+    onForbidden: function (fn) {
+      var self = this;
+      this._onForbidden = function () {
         return new Promise(function(resolve, reject) {
           fn(self, resolve, reject)
         })
@@ -78,6 +89,7 @@ module.exports = (function () {
       }
 
       var onUnauthorized = this._onUnauthorized,
+          onForbidden = this._onForbidden,
           self = this;
 
       self.logger.log("request", options.method, href)
@@ -93,6 +105,10 @@ module.exports = (function () {
           } else {
             return response.json()
           }
+        } else if(response.status == 403) {
+          return onForbidden(self).then(function() {
+            return response.json()
+          })
         } else {
           self._retryCount = 0
           return response.json()
