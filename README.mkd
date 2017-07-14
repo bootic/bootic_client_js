@@ -37,10 +37,10 @@ client.run(link, {q: "sale"})
 So you can follow links contained in API responses by chaining promises:
 
 ```javascript
-var myShop = client.root().then(function(root) { return root.shops[0] })
-var myProducts = myShop.then(function(shop) { return client.run(shop._links["btc:products"]) })
+var myShop = function(root) { return root.shops[0] }
+var myProducts = function(shop) { return client.run(shop._links["btc:products"]) }
 
-myProducts.then(function(prods) {
+client.root().then(myShop).then(myProducts).then(function(prods) {
   console.log('products', prods)
 })
 ```
