@@ -109,6 +109,9 @@ module.exports = (function () {
           return onForbidden(self).then(function() {
             return response.json()
           })
+        } else if(response.status == 204) {
+          self._retryCount = 0
+          return {}
         } else {
           self._retryCount = 0
           return response.json()
