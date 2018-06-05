@@ -85,3 +85,18 @@ var client = client.onForbidden(function (cl, next) {
   next()
 })
 ```
+
+## import
+
+```javascript
+import {Client} from `bootic_client_js`
+```
+
+## Development
+
+```
+npm install
+npm test
+```
+
+Build with `webpack`
