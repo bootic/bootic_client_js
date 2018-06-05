@@ -1,6 +1,6 @@
 var sinon = require('sinon');
 
-require('es6-promise').polyfill();
+// require('es6-promise').polyfill();
 var fetch = require('node-fetch');
 
 // var Response = fetch.Response;
