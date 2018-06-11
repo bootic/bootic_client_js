@@ -125,10 +125,10 @@ module.exports = (function () {
           return response.json()
         }
       }).catch(function (err) {
-        self.logger.log(err)
         var errLink = util.clone(link)
         errLink.href = href;
         errLink.method = method;
+        self.logger.log("[network error] "+ err + " "+errLink.method+": " + errLink.href)
         onNetworkError(err, errLink, params)
         return err
       })
