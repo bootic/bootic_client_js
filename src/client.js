@@ -55,6 +55,7 @@ module.exports = (function () {
 
     onNetworkError: function (fn) {
       this._onNetworkError = fn
+      return this
     },
 
     root: function () {
