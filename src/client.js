@@ -13,6 +13,7 @@ module.exports = (function () {
   }
 
   var noop = function (client, next, reject) { reject("Unauthorized") }
+  var noopErr = function (err) {}
 
   var Client = function(opts) {
     opts = opts || {}
@@ -23,6 +24,7 @@ module.exports = (function () {
     this._retryCount = 0;
     this.onUnauthorized(noop)
     this.onForbidden(noop)
+    this.onNetworkError(noopErr)
   };
 
   Client.prototype = {
@@ -49,6 +51,10 @@ module.exports = (function () {
         })
       }
       return this
+    },
+
+    onNetworkError: function (fn) {
+      this._onNetworkError = fn
     },
 
     root: function () {
@@ -90,6 +96,7 @@ module.exports = (function () {
 
       var onUnauthorized = this._onUnauthorized,
           onForbidden = this._onForbidden,
+          onNetworkError = this._onNetworkError,
           self = this;
 
       self.logger.log("request", options.method, href)
@@ -116,6 +123,10 @@ module.exports = (function () {
           self._retryCount = 0
           return response.json()
         }
+      }).catch(function (err) {
+        self.logger.log(err)
+        onNetworkError(err)
+        return err
       })
     }
   }

@@ -61,8 +61,21 @@ describe('Client', function () {
         }, done)
       })
     }))
+
   })
 
+  describe('network error', helpers.stubNetworkError("FOOERR", function () {
+    it("handles it", function (done) {
+      var resp = null
+      subject.onNetworkError(function(err) {
+        resp = err
+      })
+
+      helpers.expectPromise(subject.root(), function (args) {
+        assert.equal(args[0], "FOOERR")
+      }, done)
+    })
+  }))
 
   describe('#run()', function () {
     describe('no parameters',

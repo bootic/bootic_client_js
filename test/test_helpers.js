@@ -16,6 +16,7 @@ function Response (body, info) {
 
 module.exports = {
   testResponse: testResponse,
+  stubNetworkError: stubNetworkError,
   reqResp: reqResp,
   headers: headers,
   expectPromise: expectPromise
@@ -146,6 +147,22 @@ function testResponse (
       })
       var promise = Promise.resolve(resp)
       fetchStub.withArgs(link.href, {method: link.method, headers: reqHeaders}).returns(promise)
+    })
+
+    afterEach(function () {
+      global.fetch.restore()
+    })
+
+    fn.call(this)
+  }
+}
+
+function stubNetworkError (err, fn) {
+  return function () {
+    var fetchStub;
+    beforeEach(function () {
+      fetchStub = sinon.stub(global, 'fetch')
+      fetchStub.returns(Promise.reject(err))
     })
 
     afterEach(function () {
