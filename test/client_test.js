@@ -66,13 +66,17 @@ describe('Client', function () {
 
   describe('network error', helpers.stubNetworkError("FOOERR", function () {
     it("handles it", function (done) {
-      var resp = null
-      subject.onNetworkError(function(err) {
-        resp = err
+      var msg, rel, params;
+      subject.onNetworkError(function(err, link, pars) {
+        msg = err
+        rel = link
+        params = pars
       })
 
       helpers.expectPromise(subject.root(), function (args) {
-        assert.equal(args[0], "FOOERR")
+        assert.equal(msg, "FOOERR")
+        assert.equal(rel.href, "https://api.bootic.net/v1")
+        assert.equal(rel.method, "get")
       }, done)
     })
   }))

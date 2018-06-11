@@ -126,7 +126,10 @@ module.exports = (function () {
         }
       }).catch(function (err) {
         self.logger.log(err)
-        onNetworkError(err)
+        var errLink = util.clone(link)
+        errLink.href = href;
+        errLink.method = method;
+        onNetworkError(err, errLink, params)
         return err
       })
     }
